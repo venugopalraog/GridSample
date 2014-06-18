@@ -16,7 +16,7 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 
 /**
- * A placeholder fragment containing a simple view.
+ * GridView fragment.
  */
 public class GridViewFragment extends Fragment  implements
 				LoaderManager.LoaderCallbacks<Cursor>, AdapterView.OnItemClickListener{
@@ -35,9 +35,9 @@ public class GridViewFragment extends Fragment  implements
 		Log.d (TAG, "onCreateView");
 		mAdapter = new GridViewAdapter(getActivity());
 		mGridView = (GridView) rootView.findViewById(R.id.gridView);
-        mGridView.setOnItemClickListener(this);
-        // Sets the GridView's data adapter
-        mGridView.setAdapter(mAdapter);
+		mGridView.setOnItemClickListener(this);
+		// Sets the GridView's data adapter
+		mGridView.setAdapter(mAdapter);
 		getLoaderManager().initLoader(IMAGE_URL_LOADER, null, this);
 		return rootView;
 	}
@@ -46,8 +46,8 @@ public class GridViewFragment extends Fragment  implements
 	public void onItemClick (AdapterView<?> parent, View view, int position,
 							long id) {
 		// TODO Auto-generated method stub
-		GridViewAdapter i = (GridViewAdapter)parent.getAdapter();
-		Cursor cur = (Cursor)i.getItem(position);
+		GridViewAdapter adapter = (GridViewAdapter)parent.getAdapter();
+		Cursor cur = (Cursor)adapter.getItem(position);
 		Log.d(TAG, "Path: " + cur.getString(1));
 		Intent intent = new Intent(getActivity(), PhotoView.class);
 		intent.putExtra("URI_ID", cur.getString(1));

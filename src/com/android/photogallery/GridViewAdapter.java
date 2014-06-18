@@ -20,18 +20,17 @@ public class GridViewAdapter  extends CursorAdapter{
 
 	LruCache mImageCache;
 	public GridViewAdapter(Context context) {
-        super(context, null, false);
+		super(context, null, false);
 
-        //Set the cacheSize based on the available memory.
-        final int cacheSize = ((int) (Runtime.getRuntime().maxMemory() / 1024)) / 8;
-
-        mImageCache = new LruCache<String, Bitmap>(cacheSize) {
-            @Override
-            protected int sizeOf(String key, Bitmap bitmap) {
-                // cache size will be measured in kilobytes rather than
-                return bitmap.getByteCount() / 1024;
-            }
-        };
+		//Set the cacheSize based on the available memory.
+		final int cacheSize = ((int) (Runtime.getRuntime().maxMemory() / 1024)) / 8;
+		mImageCache = new LruCache<String, Bitmap>(cacheSize) {
+			@Override
+			protected int sizeOf(String key, Bitmap bitmap) {
+				// cache size will be measured in kilobytes rather than
+				return bitmap.getByteCount() / 1024;
+			}
+		};
 	}
 
 	@Override
@@ -39,10 +38,8 @@ public class GridViewAdapter  extends CursorAdapter{
 		// TODO Auto-generated method stub
 		LayoutInflater inflater = LayoutInflater.from(context);
 		Log.d(TAG, "newView: ");
-
 		View layoutView = inflater.inflate(R.layout.grid_item, null);
 		View thumbView  = layoutView.findViewById(R.id.thumbView);
-
 		layoutView.setTag(thumbView);
 		return layoutView;
 	}
@@ -66,58 +63,48 @@ public class GridViewAdapter  extends CursorAdapter{
 	}
 
 	public void addBitmapToMemoryCache(String key, Bitmap bitmap) {
-	    if (getBitmapFromMemCache(key) == null) {
-	    	mImageCache.put(key, bitmap);
-	    }
+		if (getBitmapFromMemCache(key) == null) {
+			mImageCache.put(key, bitmap);
+		}
 	}
 
 	public Bitmap getBitmapFromMemCache(String key) {
-	    return (Bitmap) mImageCache.get(key);
-	}
-	
-   public static int calculateInSampleSize(BitmapFactory.Options options,
-            int reqWidth, int reqHeight) {
-        // Raw height and width of image
-        final int height = options.outHeight;
-        final int width = options.outWidth;
-        int inSampleSize = 1;    
-        if (height > reqHeight || width > reqWidth) {
-            final int halfHeight = height / 2;
-            final int halfWidth = width / 2;
-
-            // Calculate the largest inSampleSize value that is a power of 2 and
-            // keeps both height and width larger than the requested height and width.
-            while ((halfHeight / inSampleSize) > reqHeight
-                    && (halfWidth / inSampleSize) > reqWidth) {
-                inSampleSize *= 2;
-            }
-        }
-        return inSampleSize;
-    }
-
-    public static Bitmap decodeSampledBitmapFromResource (String strPath,
-    													  int reqWidth, int reqHeight) {
-        final BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(strPath, options);
-        // Calculate inSampleSize
-        options.inSampleSize = calculateInSampleSize(options,reqWidth, reqHeight);
-        options.inJustDecodeBounds = false;
-        return BitmapFactory.decodeFile(strPath, options);
+		return (Bitmap) mImageCache.get(key);
 	}
 
-    private class DecodeBitmapImage extends AsyncTask<String, Integer, Bitmap> {
-        private final WeakReference<ImageView> mImageViewReference;
+	public static int calculateInSampleSize (BitmapFactory.Options options,	int reqWidth, int reqHeight) {
+		// Raw height and width of image
+		final int height = options.outHeight;
+		final int width = options.outWidth;
+		int inSampleSize = 1;
+		if (height > reqHeight || width > reqWidth) {
+			final int halfHeight = height / 2;
+			final int halfWidth = width / 2;
 
-        DecodeBitmapImage(ImageView imgView) { 
-        	mImageViewReference = new WeakReference<ImageView>(imgView);
-    	}
+			// Calculate the largest inSampleSize value that is a power of 2 and
+			// keeps both height and width larger than the requested height and width.
+			while ((halfHeight / inSampleSize) > reqHeight
+					&& (halfWidth / inSampleSize) > reqWidth) {
+				inSampleSize *= 2;
+			}
+		}
+		return inSampleSize;
+	}
 
-		@Override
-		protected void onPreExecute() {
-			// TODO Auto-generated method stub
-			super.onPreExecute();
-			Log.d(TAG, "onPreExecute");
+	public static Bitmap decodeSampledBitmapFromResource (String strPath, int reqWidth, int reqHeight) {
+		final BitmapFactory.Options options = new BitmapFactory.Options();
+		options.inJustDecodeBounds = true;
+		BitmapFactory.decodeFile(strPath, options);
+		// Calculate inSampleSize
+		options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
+		options.inJustDecodeBounds = false;
+		return BitmapFactory.decodeFile(strPath, options);
+	}
+
+	private class DecodeBitmapImage extends AsyncTask<String, Integer, Bitmap> {
+		private final WeakReference<ImageView> mImageViewReference;
+		DecodeBitmapImage (ImageView imgView) {
+			mImageViewReference = new WeakReference<ImageView>(imgView);
 		}
 
 		@Override
@@ -135,11 +122,11 @@ public class GridViewAdapter  extends CursorAdapter{
 			super.onPostExecute(result);
 			Log.d(TAG, "onPostExecute: ");
 			if (mImageViewReference != null && result != null) {
-	            final ImageView imageView = mImageViewReference.get();
-	            if (imageView != null) {
-	                imageView.setImageBitmap(result);
-	            }
+				final ImageView imageView = mImageViewReference.get();
+				if (imageView != null) {
+					imageView.setImageBitmap(result);
+				}
 			}
 		}
-    }
+	}
 }
