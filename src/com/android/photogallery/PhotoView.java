@@ -67,7 +67,6 @@ public class PhotoView extends Activity{
 			final BitmapFactory.Options options = new BitmapFactory.Options();
 			options.inJustDecodeBounds = true;
 			BitmapFactory.decodeFile(imagePath, options);
-			// Calculate inSampleSize
 			options.inSampleSize = 4;
 			// Decode bitmap with inSampleSize set
 			options.inJustDecodeBounds = false;

@@ -111,7 +111,10 @@ public class GridViewAdapter  extends CursorAdapter{
 		protected Bitmap doInBackground(String... params) {
 			// TODO Auto-generated method stub		
 			final String imagePath = String.valueOf(params[0]);
-			final Bitmap bitmap = decodeSampledBitmapFromResource(imagePath, 100, 100);
+			final Bitmap bitmap = Bitmap.createScaledBitmap (decodeSampledBitmapFromResource(imagePath, 150, 150),
+												150,
+												150,
+												true);
 			addBitmapToMemoryCache(imagePath, bitmap);
 			return bitmap;
 		}

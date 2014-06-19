@@ -6,6 +6,8 @@
         android:id="@+id/thumbView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:maxHeight="150dp"
+        android:maxWidth="150dp"
         android:src="@drawable/ic_launcher" />
 
 </FrameLayout>

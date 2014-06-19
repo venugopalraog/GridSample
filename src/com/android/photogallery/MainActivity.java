@@ -2,14 +2,23 @@ package com.android.photogallery;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Debug;
 import android.view.Menu;
 import android.view.MenuItem;
 
 public class MainActivity extends Activity {
 
 	@Override
+	protected void onStop() {
+		// TODO Auto-generated method stub
+		super.onStop();
+		//Debug.stopMethodTracing();
+	}
+
+	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		//Debug.startMethodTracing("gallery.trace");
 		setContentView(R.layout.activity_main);
 
 		if (savedInstanceState == null) {
