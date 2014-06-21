@@ -2,9 +2,14 @@ package com.android.photogallery;
 
 import java.lang.ref.WeakReference;
 import android.content.Context;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.util.LruCache;
@@ -18,10 +23,16 @@ public class GridViewAdapter  extends CursorAdapter{
 	private static final String TAG = "GridViewAdapter";
 	private static final int IMAGE_ID = 1;
 
+	Resources mResources;
+	Bitmap mLoadingBitmap;
+
 	LruCache mImageCache;
 	public GridViewAdapter(Context context) {
 		super(context, null, false);
-
+		Log.d(TAG, "GridViewAdapter count: " + getViewTypeCount() +
+				" getCount(): " + getCount());
+		mResources = context.getResources();
+		mLoadingBitmap = BitmapFactory.decodeResource(mResources, R.drawable.ic_launcher);
 		//Set the cacheSize based on the available memory.
 		final int cacheSize = ((int) (Runtime.getRuntime().maxMemory() / 1024)) / 8;
 		mImageCache = new LruCache<String, Bitmap>(cacheSize) {
@@ -34,10 +45,18 @@ public class GridViewAdapter  extends CursorAdapter{
 	}
 
 	@Override
+	public View getView(int position, View convertView, ViewGroup parent) {
+		// TODO Auto-generated method stub
+		Log.d(TAG, "getView - position: " + position + " getCount(): " + getCount());
+		return super.getView(position, convertView, parent);
+	}
+
+	@Override
 	public View newView(Context context, Cursor cursor, ViewGroup parent) {
 		// TODO Auto-generated method stub
 		LayoutInflater inflater = LayoutInflater.from(context);
-		Log.d(TAG, "newView: ");
+		Log.d(TAG, "newView: - position: " + cursor.getPosition()
+				+ " getCount(): " + getCount());
 		View layoutView = inflater.inflate(R.layout.grid_item, null);
 		View thumbView  = layoutView.findViewById(R.id.thumbView);
 		layoutView.setTag(thumbView);
@@ -50,13 +69,16 @@ public class GridViewAdapter  extends CursorAdapter{
 		ImageView imageView = (ImageView) view.getTag();
 		String imagePath = cursor.getString(IMAGE_ID);
 		Bitmap bitmap = getBitmapFromMemCache(imagePath);
-
+		Log.d(TAG, "bindView: - position: " + cursor.getPosition()
+				+ " getCount(): " + getCount());
 		if (bitmap != null) {
 			Log.d(TAG, "cached image found set to Imageview");
 			imageView.setImageBitmap(bitmap);
-		} else {
-			Log.d(TAG, "cached image no found start Async task");
-			DecodeBitmapImage downloadTask = new DecodeBitmapImage(imageView);
+		} else if (cancelPotentialDownload(imagePath, imageView)){
+			Log.d(TAG, "cached image not found start Async task");
+			DecodeBitmapImage downloadTask = new DecodeBitmapImage(imageView, imagePath);
+	        final AsyncDrawable asyncDrawable = new AsyncDrawable(mResources, mLoadingBitmap, downloadTask);
+	        imageView.setImageDrawable(asyncDrawable);
 			downloadTask.execute(imagePath);
 			imageView.setTag(imagePath);
 		}
@@ -103,19 +125,30 @@ public class GridViewAdapter  extends CursorAdapter{
 
 	private class DecodeBitmapImage extends AsyncTask<String, Integer, Bitmap> {
 		private final WeakReference<ImageView> mImageViewReference;
-		DecodeBitmapImage (ImageView imgView) {
+		final String mImagePath;
+
+		DecodeBitmapImage (ImageView imgView, String imagePath) {
 			mImageViewReference = new WeakReference<ImageView>(imgView);
+			mImagePath = imagePath;
 		}
 
 		@Override
 		protected Bitmap doInBackground(String... params) {
-			// TODO Auto-generated method stub		
-			final String imagePath = String.valueOf(params[0]);
-			final Bitmap bitmap = Bitmap.createScaledBitmap (decodeSampledBitmapFromResource(imagePath, 150, 150),
+			// TODO Auto-generated method stub
+			Log.d(TAG, "doInBackground: URL: " + mImagePath);
+			if(isCancelled()) {
+				Log.d("cancelAsyncTask", "doInBackground: Task cancelled1");
+				return null;
+			}
+			final Bitmap bitmap = Bitmap.createScaledBitmap (decodeSampledBitmapFromResource(mImagePath, 150, 150),
 												150,
 												150,
 												true);
-			addBitmapToMemoryCache(imagePath, bitmap);
+			if(isCancelled()) {
+				Log.d("cancelAsyncTask", "doInBackground: Task cancelled2");
+				return null;
+			}
+			addBitmapToMemoryCache(mImagePath, bitmap);
 			return bitmap;
 		}
 
@@ -123,13 +156,63 @@ public class GridViewAdapter  extends CursorAdapter{
 		protected void onPostExecute(Bitmap result) {
 			// TODO Auto-generated method stub
 			super.onPostExecute(result);
-			Log.d(TAG, "onPostExecute: ");
+			Log.d(TAG, "onPostExecute: URL: " + mImagePath);
+			if(isCancelled()) {
+				Log.d("cancelAsyncTask", "Task cancelled");
+				result = null;
+				return ;
+			}
 			if (mImageViewReference != null && result != null) {
 				final ImageView imageView = mImageViewReference.get();
-				if (imageView != null) {
+				final DecodeBitmapImage bitmapWorkerTask =
+						getBitmapDownloaderTask(imageView);
+				if (this == bitmapWorkerTask && imageView != null) {
 					imageView.setImageBitmap(result);
 				}
 			}
 		}
+	}
+
+	private static DecodeBitmapImage getBitmapDownloaderTask(ImageView imageView) {
+	    if (imageView != null) {
+	        final Drawable drawable = imageView.getDrawable();
+	        if (drawable instanceof AsyncDrawable) {
+                final AsyncDrawable downloadedDrawable = (AsyncDrawable)drawable;
+	            return downloadedDrawable.getBitmapWorkerTask();
+	        }
+	    }
+	    return null;
+	}
+
+	private static boolean cancelPotentialDownload(String imagePath, ImageView imageView) {
+		final DecodeBitmapImage bitmapDownloaderTask = getBitmapDownloaderTask(imageView);
+
+	    if (bitmapDownloaderTask != null) {
+	        final String bitmapPath = bitmapDownloaderTask.mImagePath;
+	        Log.d(TAG, "cancelPotentialDownload - Downloader bitmapPath: " + bitmapPath + "imagePath: " + imagePath);
+	        if ((bitmapPath == null) || (!bitmapPath.equals(imagePath))) {
+                Log.d(TAG, "cancel the Async task");
+	            bitmapDownloaderTask.cancel(true);
+	        } else {
+	            //The same URL is already being downloaded
+                Log.d("cancelAsyncTask", "cancelPotentialDownload - same URL is already being downloaded");
+	            return false;
+	        }
+	    }
+	    return true;
+	}
+
+	static class AsyncDrawable extends BitmapDrawable  {
+	    private final WeakReference<DecodeBitmapImage> bitmapWorkerTaskReference;
+
+	    public AsyncDrawable(Resources res, Bitmap imagePath, DecodeBitmapImage bitmapWorkerTask) {
+	        super(res, imagePath);
+	        bitmapWorkerTaskReference =
+	            new WeakReference<DecodeBitmapImage>(bitmapWorkerTask);
+	    }
+
+	    public DecodeBitmapImage getBitmapWorkerTask() {
+	        return bitmapWorkerTaskReference.get();
+	    }
 	}
 }
