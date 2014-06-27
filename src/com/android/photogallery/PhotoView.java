@@ -124,21 +124,21 @@ public class PhotoView extends Activity{
 	}
 
 	private boolean getLocationDetails(ExifInterface exif) {
-		 String attrLATITUDE = exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE);
-		 String attrLATITUDE_REF = exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE_REF);
-		 String attrLONGITUDE = exif.getAttribute(ExifInterface.TAG_GPS_LONGITUDE);
-		 String attrLONGITUDE_REF = exif.getAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF);
+		 String latitude = exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE);
+		 String latitudeRef = exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE_REF);
+		 String longitude = exif.getAttribute(ExifInterface.TAG_GPS_LONGITUDE);
+		 String longitudeRef = exif.getAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF);
 
-		 if ((attrLATITUDE !=null) && (attrLATITUDE_REF !=null)
-				 && (attrLONGITUDE != null) && (attrLONGITUDE_REF !=null)) {
-			if (attrLATITUDE_REF.equals("N"))
-				mLatitude = convertToDegree(attrLATITUDE);
+		 if ((latitude != null) && (latitudeRef != null)
+				 && (longitude != null) && (longitudeRef !=null)) {
+			if (latitudeRef.equals("N"))
+				mLatitude = convertToDegree (latitude);
 			else
-				mLatitude = 0 - convertToDegree(attrLATITUDE);
-			if (attrLONGITUDE_REF.equals("E"))
-				mLongitude = convertToDegree(attrLONGITUDE);
+				mLatitude = 0 - convertToDegree (latitude);
+			if (longitudeRef.equals("E"))
+				mLongitude = convertToDegree(longitude);
 			else
-				mLongitude = 0 - convertToDegree(attrLONGITUDE);
+				mLongitude = 0 - convertToDegree(longitude);
 
 			return true;
 		 }
