@@ -1,12 +1,14 @@
 package com.android.photogallery;
 
+import com.android.photogallery.GridViewFragment.OnGridViewItemSelectedListener;
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Debug;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements OnGridViewItemSelectedListener{
 
 	@Override
 	protected void onStop() {
@@ -45,5 +47,13 @@ public class MainActivity extends Activity {
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
+	}
+
+	@Override
+	public void onGridItemSelected(int position, String imagePath) {
+		// TODO Auto-generated method stub
+		Intent intent = new Intent(this, PhotoView.class);
+		intent.putExtra("URI_ID", imagePath);
+		startActivity(intent);
 	}
 }

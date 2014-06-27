@@ -53,13 +53,13 @@ public class PhotoView extends Activity{
 			   }
 			   TextView location = (TextView) findViewById(R.id.location);
 			   if (getLocationDetails(exif)) {
-				   location.setText(getLocation(Double.valueOf(mLatitude),
-						   Double.valueOf(mLongitude)));
+				   //Start Async Task to load image location details into Location 
+				   //TextView
+				   LoadImageLocation loadLocationTask = new LoadImageLocation();
+				   loadLocationTask.execute(exif);
 			   } else {
 				   location.setText("Location: Not Available");
 			   }
-//			   LoadImageLocation loadLocationTask = new LoadImageLocation();
-//			   loadLocationTask.execute(exif);
 			} catch (IOException e) {
 			   e.printStackTrace();
 			}
@@ -83,7 +83,7 @@ public class PhotoView extends Activity{
 	}
 
 	private class LoadImageLocation extends AsyncTask<ExifInterface, Integer, Boolean> {
-		String mLocation = null;
+		String mLocation = "Location: Not Available";
 
 		@Override
 		protected void onPostExecute(Boolean result) {
@@ -96,7 +96,7 @@ public class PhotoView extends Activity{
 		@Override
 		protected Boolean doInBackground(ExifInterface... params) {
 			// TODO Auto-generated method stub
-			if (getLocationDetails(params[0])) {
+			if ((mLatitude != null) && (mLongitude != null)) {
 				mLocation = getLocation(Double.valueOf(mLatitude), Double.valueOf(mLongitude));
 				return true;
 			}
@@ -117,7 +117,6 @@ public class PhotoView extends Activity{
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
-
 		if (city != null)
 			return ("Location:"+city+","+country);
 		else

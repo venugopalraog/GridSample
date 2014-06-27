@@ -1,9 +1,9 @@
 package com.android.photogallery;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.app.LoaderManager;
 import android.content.CursorLoader;
-import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -26,6 +26,24 @@ public class GridViewFragment extends Fragment  implements
 													MediaStore.Images.Media.DATA };
 	GridView mGridView;
 	GridViewAdapter mAdapter;
+	//OnGridViewItemSelectedListener mCallback;
+	Activity mActivity;
+    // Main Activity must implement this interface
+    public interface OnGridViewItemSelectedListener {
+        public void onGridItemSelected(int position, String imagePath);
+    }
+
+	@Override
+	public void onAttach(Activity activity) {
+		// TODO Auto-generated method stub
+		super.onAttach(activity);
+		try {
+			mActivity = activity;
+		} catch (ClassCastException e) {
+			throw new ClassCastException(activity.toString()
+						+ " must implement OnGridViewItemSelectedListener");
+		}
+	}
 
 	@Override
 	public View onCreateView (LayoutInflater inflater, ViewGroup container,
@@ -33,7 +51,7 @@ public class GridViewFragment extends Fragment  implements
 		View rootView = inflater.inflate (R.layout.grid_view, container,
 										  false);
 		Log.d (TAG, "onCreateView");
-		mAdapter = new GridViewAdapter(getActivity());
+		mAdapter = new GridViewAdapter(mActivity);
 		mGridView = (GridView) rootView.findViewById(R.id.gridView);
 		mGridView.setOnItemClickListener(this);
 		// Sets the GridView's data adapter
@@ -48,10 +66,7 @@ public class GridViewFragment extends Fragment  implements
 		// TODO Auto-generated method stub
 		GridViewAdapter adapter = (GridViewAdapter)parent.getAdapter();
 		Cursor cur = (Cursor)adapter.getItem(position);
-		Log.d(TAG, "Path: " + cur.getString(1));
-		Intent intent = new Intent(getActivity(), PhotoView.class);
-		intent.putExtra("URI_ID", cur.getString(1));
-		startActivity(intent);
+		((OnGridViewItemSelectedListener) mActivity).onGridItemSelected(position, cur.getString(1));
 	}
 
 	@Override
@@ -60,7 +75,7 @@ public class GridViewFragment extends Fragment  implements
 		Log.d (TAG, "onCreateLoader");
 		switch (id) { 
 			case IMAGE_URL_LOADER:
-				 return new CursorLoader (getActivity(),
+				 return new CursorLoader (mActivity,
 	                        			  MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
 	                        			  mProjection,
 	                        			  null,

@@ -6,9 +6,7 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -26,7 +24,7 @@ public class GridViewAdapter  extends CursorAdapter{
 	Resources mResources;
 	Bitmap mLoadingBitmap;
 
-	LruCache mImageCache;
+	LruCache<String, Bitmap> mImageCache;
 	public GridViewAdapter(Context context) {
 		super(context, null, false);
 		Log.d(TAG, "GridViewAdapter count: " + getViewTypeCount() +
@@ -80,7 +78,6 @@ public class GridViewAdapter  extends CursorAdapter{
 	        final AsyncDrawable asyncDrawable = new AsyncDrawable(mResources, mLoadingBitmap, downloadTask);
 	        imageView.setImageDrawable(asyncDrawable);
 			downloadTask.execute(imagePath);
-			imageView.setTag(imagePath);
 		}
 	}
 
