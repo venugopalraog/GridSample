@@ -9,6 +9,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 public class MainActivity extends Activity implements OnGridViewItemSelectedListener{
+	private static final String PATH = "ImagePath";
 
 	@Override
 	protected void onStop() {
@@ -53,7 +54,7 @@ public class MainActivity extends Activity implements OnGridViewItemSelectedList
 	public void onGridItemSelected(int position, String imagePath) {
 		// TODO Auto-generated method stub
 		Intent intent = new Intent(this, PhotoView.class);
-		intent.putExtra("URI_ID", imagePath);
+		intent.putExtra(PATH, imagePath);
 		startActivity(intent);
 	}
 }

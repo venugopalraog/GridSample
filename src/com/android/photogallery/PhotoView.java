@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Locale;
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.location.Address;
@@ -20,8 +21,11 @@ import android.widget.TextView;
 
 public class PhotoView extends Activity{
 	private static final String TAG = "PhotoView";
+	private static final String PATH = "ImagePath";
+
 	ImageView mImage;
 	Float mLatitude, mLongitude;
+	Resources mResources;
 
 	@Override
 	protected void onDestroy() {
@@ -35,21 +39,22 @@ public class PhotoView extends Activity{
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
+		mResources = getResources();
 		Log.d (TAG, "onCreate()");
 		setContentView(R.layout.photo_view);
 		Bundle extras = getIntent().getExtras();
 		if (extras != null) {
-			String imagePath = extras.getString("URI_ID");
+			String imagePath = extras.getString(PATH);
 			Log.d (TAG, "imagepath received: " + imagePath);
 			TextView date = (TextView) findViewById(R.id.date);
 			try {
 			   ExifInterface exif = new ExifInterface(imagePath);
 			   String dateTime = exif.getAttribute(ExifInterface.TAG_DATETIME);
-			   if(dateTime!=null) {
-				   String[] parts =dateTime.split(" ");
-				   date.setText("Date: " + parts[0]);
+			   if(dateTime != null) {
+				   String[] parts = dateTime.split(" ");
+				   date.setText(mResources.getString(R.string.date) + parts[0]);
 			   } else {
-				   date.setText("Date: Not available");
+				   date.setText(mResources.getString(R.string.date_not_available));
 			   }
 			   TextView location = (TextView) findViewById(R.id.location);
 			   if (getLocationDetails(exif)) {
@@ -58,7 +63,7 @@ public class PhotoView extends Activity{
 				   LoadImageLocation loadLocationTask = new LoadImageLocation();
 				   loadLocationTask.execute(exif);
 			   } else {
-				   location.setText("Location: Not Available");
+				   location.setText(mResources.getString(R.string.location_not_available));
 			   }
 			} catch (IOException e) {
 			   e.printStackTrace();
@@ -118,9 +123,9 @@ public class PhotoView extends Activity{
 			e.printStackTrace();
 		}
 		if (city != null)
-			return ("Location:"+city+","+country);
+			return (mResources.getString(R.string.location) + city + "," + country);
 		else
-			return ("Location: Not Available");
+			return  mResources.getString(R.string.location_not_available);
 	}
 
 	private boolean getLocationDetails(ExifInterface exif) {
@@ -139,7 +144,6 @@ public class PhotoView extends Activity{
 				mLongitude = convertToDegree(longitude);
 			else
 				mLongitude = 0 - convertToDegree(longitude);
-
 			return true;
 		 }
 		 return false;

@@ -23,8 +23,8 @@ public class GridViewAdapter  extends CursorAdapter{
 
 	Resources mResources;
 	Bitmap mLoadingBitmap;
-
 	LruCache<String, Bitmap> mImageCache;
+
 	public GridViewAdapter(Context context) {
 		super(context, null, false);
 		Log.d(TAG, "GridViewAdapter count: " + getViewTypeCount() +

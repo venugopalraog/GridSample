@@ -28,6 +28,7 @@ public class GridViewFragment extends Fragment  implements
 	GridViewAdapter mAdapter;
 	//OnGridViewItemSelectedListener mCallback;
 	Activity mActivity;
+
     // Main Activity must implement this interface
     public interface OnGridViewItemSelectedListener {
         public void onGridItemSelected(int position, String imagePath);
