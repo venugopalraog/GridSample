@@ -4,7 +4,6 @@ import com.android.photogallery.GridViewFragment.OnGridViewItemSelectedListener;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Debug;
 import android.view.Menu;
 import android.view.MenuItem;
 

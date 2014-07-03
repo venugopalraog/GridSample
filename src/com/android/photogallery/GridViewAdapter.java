@@ -17,7 +17,7 @@ import android.view.ViewGroup;
 import android.widget.CursorAdapter;
 import android.widget.ImageView;
 
-public class GridViewAdapter  extends CursorAdapter{
+public class GridViewAdapter  extends CursorAdapter {
 	private static final String TAG = "GridViewAdapter";
 	private static final int IMAGE_ID = 1;
 

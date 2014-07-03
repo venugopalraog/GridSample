@@ -3,6 +3,7 @@ package com.android.photogallery;
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
@@ -26,6 +27,7 @@ public class PhotoView extends Activity{
 	ImageView mImage;
 	Float mLatitude, mLongitude;
 	Resources mResources;
+	Bitmap mBitmap;
 
 	@Override
 	protected void onDestroy() {
@@ -71,11 +73,12 @@ public class PhotoView extends Activity{
 			//Load image bitmap
 			final BitmapFactory.Options options = new BitmapFactory.Options();
 			options.inJustDecodeBounds = true;
-			BitmapFactory.decodeFile(imagePath, options);
+			mBitmap = BitmapFactory.decodeFile(imagePath, options);
 			options.inSampleSize = 4;
 			// Decode bitmap with inSampleSize set
 			options.inJustDecodeBounds = false;
-			Bitmap mBitmap =  BitmapFactory.decodeFile(imagePath, options);
+			mBitmap =  BitmapFactory.decodeFile(imagePath, options);
+
 			mImage = (ImageView) findViewById(R.id.imageview);
 			mImage.setImageBitmap(mBitmap);
 		}
@@ -88,7 +91,7 @@ public class PhotoView extends Activity{
 	}
 
 	private class LoadImageLocation extends AsyncTask<ExifInterface, Integer, Boolean> {
-		String mLocation = "Location: Not Available";
+		String mLocation;
 
 		@Override
 		protected void onPostExecute(Boolean result) {
@@ -134,6 +137,8 @@ public class PhotoView extends Activity{
 		 String longitude = exif.getAttribute(ExifInterface.TAG_GPS_LONGITUDE);
 		 String longitudeRef = exif.getAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF);
 
+		 Log.d(TAG, "getLocationDetails: latitude: " + latitude + " latitudeRef: " +
+				 latitudeRef + " longitude: " + longitude + " longitudeRef: " + longitudeRef);
 		 if ((latitude != null) && (latitudeRef != null)
 				 && (longitude != null) && (longitudeRef !=null)) {
 			if (latitudeRef.equals("N"))
@@ -144,11 +149,13 @@ public class PhotoView extends Activity{
 				mLongitude = convertToDegree(longitude);
 			else
 				mLongitude = 0 - convertToDegree(longitude);
+			Log.d(TAG, "Converted -- Latitue: " + mLatitude + " Longitude: " + mLongitude);
 			return true;
 		 }
 		 return false;
 	}
 
+	@SuppressLint("UseValueOf")
 	private Float convertToDegree(String stringDMS){
 		Float result = null;
 		String[] DMS = stringDMS.split(",", 3);
@@ -169,5 +176,15 @@ public class PhotoView extends Activity{
 		result = new Float(FloatD + (FloatM/60) + (FloatS/3600));
 
 		return result;
+	}
+
+	@Override
+	public void onBackPressed() {
+		// TODO Auto-generated method stub
+		super.onBackPressed();
+		//Releasing the Bitmap object to optimize the memory
+		if (mBitmap != null) {
+			mBitmap.recycle();
+		}
 	}
 }
